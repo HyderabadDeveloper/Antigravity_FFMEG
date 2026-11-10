@@ -10,6 +10,7 @@ import { BrainstormChatTab } from '@/components/studio/BrainstormChatTab';
 import { ContinuityTab } from '@/components/studio/ContinuityTab';
 import { SceneStoryboardTab } from '@/components/studio/SceneStoryboardTab';
 import { KeyframeStudioTab } from '@/components/studio/KeyframeStudioTab';
+import { ClipReviewTab } from '@/components/studio/ClipReviewTab';
 import { ProviderExportTab } from '@/components/studio/ProviderExportTab';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +21,7 @@ export default function ProjectStudioPage() {
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
-  const [activeTab, setActiveTab] = useState<StudioTab>('storyboard');
+  const [activeTab, setActiveTab] = useState<StudioTab>('review');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +32,6 @@ export default function ProjectStudioPage() {
   // Fetch project data
   const fetchProject = async () => {
     try {
-      setIsLoading(true);
       const res = await fetch(`/api/projects/${projectId}`);
       const data = await res.json();
       if (!data.success || !data.project) {
@@ -247,6 +247,10 @@ export default function ProjectStudioPage() {
             onGenerateKeyframe={handleGenerateKeyframe}
             isGeneratingKeyframe={isGeneratingKeyframe}
           />
+        )}
+
+        {activeTab === 'review' && (
+          <ClipReviewTab project={project} onRefreshProject={fetchProject} />
         )}
 
         {activeTab === 'export' && <ProviderExportTab project={project} />}

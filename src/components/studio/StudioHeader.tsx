@@ -16,6 +16,7 @@ import {
   Share2,
   Clock,
   CheckCircle2,
+  Video,
 } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
 
@@ -25,6 +26,7 @@ export type StudioTab =
   | 'continuity'
   | 'storyboard'
   | 'keyframes'
+  | 'review'
   | 'export';
 
 interface StudioHeaderProps {
@@ -45,6 +47,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   const totalRuntime = project.scenes.reduce((sum, s) => sum + (s.durationSeconds || 5), 0);
   const promptReadyCount = project.scenes.filter((s) => !!s.synthesizedPrompt).length;
   const keyframesReadyCount = project.scenes.filter((s) => s.keyframeStatus === 'ready').length;
+  const scenesWithTakesCount = project.scenes.filter((s) => (s.takes?.length || 0) > 0).length;
 
   const tabs: { id: StudioTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'concept', label: '1. Concept Brief', icon: <Layers className="w-4 h-4" /> },
@@ -72,7 +75,13 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
       icon: <ImageIcon className="w-4 h-4" />,
       badge: `${keyframesReadyCount}/${project.scenes.length}`,
     },
-    { id: 'export', label: '6. Provider Export', icon: <Share2 className="w-4 h-4" /> },
+    {
+      id: 'review',
+      label: '6. Clip Review (FFmpeg)',
+      icon: <Video className="w-4 h-4" />,
+      badge: `${scenesWithTakesCount}/${project.scenes.length}`,
+    },
+    { id: 'export', label: '7. Provider Export', icon: <Share2 className="w-4 h-4" /> },
   ];
 
   return (

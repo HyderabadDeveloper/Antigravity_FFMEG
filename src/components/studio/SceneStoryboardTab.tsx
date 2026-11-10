@@ -236,6 +236,12 @@ export const SceneStoryboardTab: React.FC<SceneStoryboardTabProps> = ({
                         <span>{scene.cameraMovement.replace(/_/g, ' ')}</span>
                       </Badge>
 
+                      {scene.takes && scene.takes.length > 0 && (
+                        <Badge variant="emerald" size="sm">
+                          {scene.takes.length} Take{scene.takes.length > 1 ? 's' : ''} Normalized
+                        </Badge>
+                      )}
+
                       {assignedChars.map((char) => (
                         <span
                           key={char.id}

@@ -19,9 +19,9 @@ export interface CharacterProfile {
   projectId: string;
   name: string;
   role: 'Protagonist' | 'Antagonist' | 'Supporting' | 'Narrator';
-  visualSummary: string; // e.g. "Early 30s detective, rugged jawline, silver-flecked black hair, tired grey eyes"
-  attireTokens: string; // e.g. "Charcoal distressed wool trench coat, dark turtleneck, fingerless gloves"
-  distinguishingFeatures: string; // e.g. "Cybernetic neural jack behind right ear, thin scar over left brow"
+  visualSummary: string; // e.g. "Early 30s detective, razor-sharp jawline, silver-flecked black hair, tired grey eyes"
+  attireTokens: string; // e.g. "Charcoal distressed wool trenchcoat over high-collar carbon-fiber weave vest, fingerless gloves"
+  distinguishingFeatures: string; // e.g. "Cybernetic neural jack behind right ear, thin combat scar over left eyebrow"
   referenceKeyframeUrl?: string; // Anchor image URL for Image-to-Video
   voiceTone?: string; // Voice attributes for TTS
   colorKey?: string; // Badge color
@@ -44,6 +44,25 @@ export interface CreativeBrief {
   musicAtmosphere?: string;
 }
 
+export interface Take {
+  id: string;
+  sceneId: string;
+  takeNumber: number;
+  providerId: string;
+  prompt: string;
+  rawVideoUrl: string;
+  normalizedVideoUrl: string;
+  durationSeconds: number;
+  aspectRatio: AspectRatio;
+  resolution: Resolution;
+  fps: number; // 30
+  pixelFormat: string; // 'yuv420p'
+  audioSampleRate: number; // 48000
+  codec: string; // 'h264'
+  status: 'ready' | 'processing' | 'failed';
+  createdAt: string;
+}
+
 export interface Scene {
   id: string;
   projectId: string;
@@ -60,6 +79,8 @@ export interface Scene {
   keyframeStatus?: 'none' | 'generating' | 'ready';
   status: 'draft' | 'prompt_ready' | 'keyframe_ready' | 'rendered';
   notes?: string;
+  takes?: Take[];
+  activeTakeId?: string;
 }
 
 export interface ChatMessage {
@@ -103,6 +124,53 @@ export interface VideoGenerationRequest {
   seed?: number;
   motionIntensity?: number;
   cameraMovement?: CameraMovement;
+}
+
+export interface VideoProviderAdapter {
+  readonly id: string;
+  readonly name: string;
+  readonly capabilities: {
+    supportsImageToVideo: boolean;
+    supportsCameraMotion: boolean;
+    supportedAspectRatios: string[];
+    maxDurationSeconds: number;
+  };
+
+  submit(request: VideoGenerationRequest): Promise<{ providerJobId: string; status: 'queued' | 'processing' }>;
+  getStatus(providerJobId: string): Promise<{
+    status: 'queued' | 'processing' | 'completed' | 'failed';
+    progressPercent: number;
+    videoUrl?: string;
+    errorMessage?: string;
+  }>;
+  cancel?(providerJobId: string): Promise<boolean>;
+}
+
+export type JobStatus =
+  | 'queued'
+  | 'generating'
+  | 'ingesting'
+  | 'normalizing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
+export interface GenerationJob {
+  id: string;
+  projectId: string;
+  sceneId: string;
+  providerId: string;
+  providerJobId?: string;
+  status: JobStatus;
+  progressPercent: number;
+  stageDescription: string;
+  takeNumber: number;
+  request: VideoGenerationRequest;
+  rawVideoUrl?: string;
+  normalizedVideoUrl?: string;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface KeyframeGenerationRequest {
