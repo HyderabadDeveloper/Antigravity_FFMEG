@@ -20,10 +20,10 @@ export const Header: React.FC = () => {
               <span className="font-bold text-base tracking-tight text-white group-hover:text-cyan-300 transition-colors">
                 Antigravity Video
               </span>
-              <Badge variant="cyan" size="sm">Phase 3</Badge>
+              <Badge variant="cyan" size="sm">Phase 1-4 Complete</Badge>
             </div>
             <p className="text-[11px] text-slate-400 font-medium">
-              Multi-Track Audio & FFmpeg Timeline Assembly
+              Multi-Provider AI Video Platform & FFmpeg Pipeline
             </p>
           </div>
         </Link>
@@ -31,7 +31,7 @@ export const Header: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-2 text-xs text-slate-400">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Multi-Track Assembly Ready</span>
+            <span>All 4 Production Phases Active</span>
           </div>
           <Link
             href="/"

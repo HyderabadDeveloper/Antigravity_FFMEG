@@ -12,6 +12,7 @@ import { SceneStoryboardTab } from '@/components/studio/SceneStoryboardTab';
 import { KeyframeStudioTab } from '@/components/studio/KeyframeStudioTab';
 import { ClipReviewTab } from '@/components/studio/ClipReviewTab';
 import { TimelineAssemblyTab } from '@/components/studio/TimelineAssemblyTab';
+import { ProviderBenchmarkTab } from '@/components/studio/ProviderBenchmarkTab';
 import { ProviderExportTab } from '@/components/studio/ProviderExportTab';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -22,7 +23,7 @@ export default function ProjectStudioPage() {
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
-  const [activeTab, setActiveTab] = useState<StudioTab>('timeline');
+  const [activeTab, setActiveTab] = useState<StudioTab>('benchmarks');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -256,6 +257,10 @@ export default function ProjectStudioPage() {
 
         {activeTab === 'timeline' && (
           <TimelineAssemblyTab project={project} onRefreshProject={fetchProject} />
+        )}
+
+        {activeTab === 'benchmarks' && (
+          <ProviderBenchmarkTab project={project} onRefreshProject={fetchProject} />
         )}
 
         {activeTab === 'export' && <ProviderExportTab project={project} />}

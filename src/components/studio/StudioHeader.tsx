@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Video,
   Wand2,
+  Cpu,
 } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
 
@@ -29,6 +30,7 @@ export type StudioTab =
   | 'keyframes'
   | 'review'
   | 'timeline'
+  | 'benchmarks'
   | 'export';
 
 interface StudioHeaderProps {
@@ -89,7 +91,12 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
       icon: <Wand2 className="w-4 h-4 text-emerald-400" />,
       badge: project.masterExportUrl ? 'Ready' : undefined,
     },
-    { id: 'export', label: '8. Provider Export', icon: <Share2 className="w-4 h-4" /> },
+    {
+      id: 'benchmarks',
+      label: '8. Benchmarks & Trimming',
+      icon: <Cpu className="w-4 h-4 text-cyan-400" />,
+    },
+    { id: 'export', label: '9. Provider Export', icon: <Share2 className="w-4 h-4" /> },
   ];
 
   return (

@@ -14,7 +14,7 @@ export type CameraMovement =
   | 'orbital_spin'
   | 'handheld_dynamic';
 
-export type TransitionType = 'cut' | 'dissolve';
+export type TransitionType = 'cut' | 'dissolve' | 'fade_black';
 
 export interface CharacterProfile {
   id: string;
@@ -47,6 +47,11 @@ export interface CreativeBrief {
   musicAtmosphere?: string;
 }
 
+export interface TakeTrimming {
+  inPointSeconds: number; // Start trim (seconds)
+  outPointSeconds: number; // End trim (seconds)
+}
+
 export interface Take {
   id: string;
   sceneId: string;
@@ -63,6 +68,7 @@ export interface Take {
   audioSampleRate: number; // 48000
   codec: string; // 'h264'
   status: 'ready' | 'processing' | 'failed';
+  trimming?: TakeTrimming;
   createdAt: string;
 }
 
@@ -89,6 +95,7 @@ export interface Scene {
   keyframeStatus?: 'none' | 'generating' | 'ready';
   status: 'draft' | 'prompt_ready' | 'keyframe_ready' | 'rendered';
   notes?: string;
+  preferredProviderId?: string; // Phase 4 provider selection
   takes?: Take[];
   activeTakeId?: string;
   voiceoverUrl?: string;
@@ -124,6 +131,18 @@ export interface MusicTrack {
   mood: string;
   audioUrl: string;
   durationSeconds: number;
+}
+
+export interface ProviderBenchmark {
+  id: string;
+  name: string;
+  company: string;
+  costPerSecond: number;
+  avgTurnaroundSeconds: number;
+  qualityScore: number; // 1-10
+  consistencyScore: number; // 1-10
+  bestFor: string;
+  strengths: string[];
 }
 
 export interface Project {
