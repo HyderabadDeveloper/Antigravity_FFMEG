@@ -17,6 +17,7 @@ import {
   Clock,
   CheckCircle2,
   Video,
+  Wand2,
 } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
 
@@ -27,6 +28,7 @@ export type StudioTab =
   | 'storyboard'
   | 'keyframes'
   | 'review'
+  | 'timeline'
   | 'export';
 
 interface StudioHeaderProps {
@@ -81,7 +83,13 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
       icon: <Video className="w-4 h-4" />,
       badge: `${scenesWithTakesCount}/${project.scenes.length}`,
     },
-    { id: 'export', label: '7. Provider Export', icon: <Share2 className="w-4 h-4" /> },
+    {
+      id: 'timeline',
+      label: '7. Timeline Assembly (Master)',
+      icon: <Wand2 className="w-4 h-4 text-emerald-400" />,
+      badge: project.masterExportUrl ? 'Ready' : undefined,
+    },
+    { id: 'export', label: '8. Provider Export', icon: <Share2 className="w-4 h-4" /> },
   ];
 
   return (
@@ -109,6 +117,11 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                 <Badge variant="indigo" size="sm">
                   {project.visualGenre}
                 </Badge>
+                {project.masterExportUrl && (
+                  <Badge variant="emerald" size="sm">
+                    Master Rendered
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
                 <span className="flex items-center gap-1">

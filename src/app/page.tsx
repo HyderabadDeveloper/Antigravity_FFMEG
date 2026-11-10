@@ -95,16 +95,16 @@ export default function DashboardPage() {
 
           <div className="relative z-10 max-w-3xl space-y-4">
             <div className="flex items-center gap-2">
-              <Badge variant="cyan">Phase 1 & 2 Production Engine</Badge>
-              <Badge variant="emerald">FFmpeg Normalization Queue Active</Badge>
+              <Badge variant="cyan">Phase 1, 2 & 3 Production Suite</Badge>
+              <Badge variant="emerald">Multi-Track Assembly & Ducking Live</Badge>
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              AI Video Creation & Continuity Studio
+              AI Video Creation & Assembly Platform
             </h1>
 
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Eliminate aesthetic drift across cuts. Generate anchored scene takes via Runway Gen-3 and Google Veo, ingest raw footage, and automatically normalize to standardized 30fps with 48kHz audio.
+              Full end-to-end studio: From creative brief and persistent character continuity to scene take normalization, TTS narration, styled subtitles (.ass), sidechain audio ducking, and master MP4 export.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">

@@ -14,6 +14,8 @@ export type CameraMovement =
   | 'orbital_spin'
   | 'handheld_dynamic';
 
+export type TransitionType = 'cut' | 'dissolve';
+
 export interface CharacterProfile {
   id: string;
   projectId: string;
@@ -24,6 +26,7 @@ export interface CharacterProfile {
   distinguishingFeatures: string; // e.g. "Cybernetic neural jack behind right ear, thin combat scar over left eyebrow"
   referenceKeyframeUrl?: string; // Anchor image URL for Image-to-Video
   voiceTone?: string; // Voice attributes for TTS
+  voiceId?: string; // ElevenLabs or TTS voice identifier
   colorKey?: string; // Badge color
 }
 
@@ -63,6 +66,13 @@ export interface Take {
   createdAt: string;
 }
 
+export interface SceneAudio {
+  voiceoverUrl?: string;
+  durationSeconds?: number;
+  timestamps?: Array<{ word: string; startMs: number; endMs: number }>;
+  status?: 'none' | 'generating' | 'ready';
+}
+
 export interface Scene {
   id: string;
   projectId: string;
@@ -81,6 +91,8 @@ export interface Scene {
   notes?: string;
   takes?: Take[];
   activeTakeId?: string;
+  voiceoverUrl?: string;
+  voiceoverDuration?: number;
 }
 
 export interface ChatMessage {
@@ -90,6 +102,28 @@ export interface ChatMessage {
   timestamp: string;
   suggestedScenes?: Partial<Scene>[];
   suggestedBrief?: Partial<CreativeBrief>;
+}
+
+export interface TimelineSettings {
+  transitionType: TransitionType;
+  transitionDurationSeconds: number; // e.g. 0.5s
+  includeVoiceover: boolean;
+  includeMusic: boolean;
+  selectedMusicId: string;
+  musicVolume: number; // 0.0 - 1.0 (default 0.25)
+  duckingIntensity: number; // 0.0 - 1.0 (default 0.70)
+  burnSubtitles: boolean;
+  subtitleStyle: 'cinematic' | 'minimal' | 'bold';
+}
+
+export interface MusicTrack {
+  id: string;
+  title: string;
+  genre: string;
+  tempo: string;
+  mood: string;
+  audioUrl: string;
+  durationSeconds: number;
 }
 
 export interface Project {
@@ -106,6 +140,9 @@ export interface Project {
   characters: CharacterProfile[];
   scenes: Scene[];
   brainstormMessages: ChatMessage[];
+  timelineSettings?: TimelineSettings;
+  masterExportUrl?: string;
+  masterSubtitlesUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -168,6 +205,29 @@ export interface GenerationJob {
   request: VideoGenerationRequest;
   rawVideoUrl?: string;
   normalizedVideoUrl?: string;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AssemblyStatus =
+  | 'queued'
+  | 'rendering_tts'
+  | 'generating_subtitles'
+  | 'mixing_audio'
+  | 'stitching_timeline'
+  | 'completed'
+  | 'failed';
+
+export interface AssemblyJob {
+  id: string;
+  projectId: string;
+  status: AssemblyStatus;
+  progressPercent: number;
+  stageDescription: string;
+  masterVideoUrl?: string;
+  subtitleUrl?: string;
+  settings: TimelineSettings;
   errorMessage?: string;
   createdAt: string;
   updatedAt: string;

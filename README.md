@@ -1,8 +1,8 @@
-# AI Video Creation Platform — Phase 1 & 2: Continuity Engine, Provider Adapters & FFmpeg Normalization Queue
+# AI Video Creation Platform — Phase 1, 2 & 3: Production Suite
 
-A production-grade, single-stack TypeScript platform implementing **Phase 1** and **Phase 2** of the [AI Video Creation Platform Architecture](./video_creation_platform_architecture_final.md).
+A production-grade, single-stack TypeScript platform implementing **Phase 1, Phase 2, and Phase 3** of the [AI Video Creation Platform Architecture](./video_creation_platform_architecture_final.md).
 
-The platform transforms raw ideas into structured creative briefs, master character sheets, camera-choreographed scene storyboards, anchored keyframes, and dispatches takes through video generation adapters (Runway Gen-3 Alpha, Google Veo), ingesting and normalizing footage via an automated FFmpeg worker queue.
+The platform transforms raw ideas into structured creative briefs, master character sheets, camera-choreographed scene storyboards, and anchored keyframes; dispatches takes through video generation adapters (Runway Gen-3, Google Veo); ingests and normalizes footage via an automated FFmpeg worker queue; and compiles multi-track timeline assemblies with TTS narration, styled timed subtitles (`.ass`), sidechain background music ducking, and master MP4 export.
 
 ---
 
@@ -20,22 +20,25 @@ The platform transforms raw ideas into structured creative briefs, master charac
 | **Stage 7: Background Queue Worker** | **Queue Dispatch & Telemetry** | Asynchronous worker processing jobs (`queued` -> `generating` -> `ingesting` -> `normalizing` -> `completed`), concurrency control, progress tracking, and job cancellation. |
 | **Stage 8: Clip Normalization** | **FFmpeg Pipeline Engine** | Automated ingestion & normalization filter chain: forces 30fps (`fps=30`), scales/pads to ratio (`1920:1080`, `1080:1920`, `1080:1080`), colorspace (`yuv420p`), standardizes audio (`48kHz AAC`), and adds `+faststart`. |
 | **Stage 7 & 8: Clip Review UI** | **Take Reviewer & HTML5 Player** | Real-time queue progress bar, side-by-side player (Normalized Take vs Raw AI output), normalization compliance badges, and multi-take versioning with active take selection. |
+| **Stage 9: Audio & Subtitle Synthesis** | **TTS & Subtitle Engine** | Generates voiceover narration per scene with word-level timestamps (ElevenLabs / OpenAI / procedural synthesis) and compiles styled `.ass` and standard `.srt` subtitle files. |
+| **Stage 10: Timeline Assembly & Export** | **Multi-Track FFmpeg Assembler** | Stitches normalized scene takes, mixes background music stems with automated sidechain ducking beneath speech, burns subtitles, and exports master 1080p MP4. |
 
 ---
 
 ## Technology Stack
 
 - **Framework**: Next.js 14+ (App Router)
-- **Language**: TypeScript (Fullstack unified schema matching `VideoGenerationRequest`, `Scene`, `CharacterProfile`, `Take`, `GenerationJob`)
+- **Language**: TypeScript (Fullstack unified schema matching `VideoGenerationRequest`, `Scene`, `CharacterProfile`, `Take`, `GenerationJob`, `TimelineSettings`)
 - **Styling**: Tailwind CSS with dark cyber-studio theme
 - **Icons**: Lucide React
 - **Media Engine**: FFmpeg (via `@ffmpeg-installer/ffmpeg` + `child_process`)
 - **Video Delivery**: Custom streaming media route (`/api/media/[...path]`) supporting HTTP 206 Partial Content range requests
 - **Data Persistence**: JSON-backed local storage in `data/projects.json` and `data/jobs.json` with automatic sample seeding
-- **AI Engines**:
-  - Creative Director Engine with structured schema extraction (supports optional `GEMINI_API_KEY` / `OPENAI_API_KEY` in `.env`)
+- **AI & Audio Engines**:
+  - Creative Director Engine with structured schema extraction (supports optional `GEMINI_API_KEY` / `OPENAI_API_KEY`)
   - Keyframe Generation Engine powered by Flux (Pollinations AI) with zero mandatory API key setup
   - Provider Adapters: Runway Gen-3 Alpha (`RUNWAY_API_KEY`) and Google Veo (`GEMINI_API_KEY`)
+  - Audio Engine: ElevenLabs TTS API (`ELEVENLABS_API_KEY`), procedural speech synthesizer, and harmonic background score generator
 
 ---
 
@@ -69,15 +72,17 @@ npm run start
 │   │   ├── layout.tsx                # App root layout with studio dark theme
 │   │   ├── page.tsx                  # Dashboard: Project cards, metrics, creation modal
 │   │   ├── globals.css               # Studio CSS variables & custom scrollbars
-│   │   ├── projects/[id]/page.tsx    # Studio Workspace: 7-stage interactive tabs
+│   │   ├── projects/[id]/page.tsx    # Studio Workspace: 8-stage interactive tabs
 │   │   └── api/
 │   │       ├── projects/             # REST endpoints (List, Create, Update, Delete)
 │   │       ├── brainstorm/           # AI Director chat route
 │   │       ├── keyframes/generate/   # Reference anchor generator route
 │   │       ├── synthesize-prompts/   # Batch prompt synthesis route
-│   │       ├── queue/
-│   │       │   ├── dispatch/         # Enqueue single or batch scene generation jobs
-│   │       │   └── jobs/             # Job status telemetry & cancellation
+│   │       ├── queue/                # Video generation job queue & telemetry
+│   │       ├── audio/
+│   │       │   ├── tts/              # Text-to-speech voiceover route
+│   │       │   └── music/            # Background music tracks route
+│   │       ├── assembly/export/      # Master timeline assembly & render route
 │   │       └── media/[...path]/      # Streaming media server with Range header support
 │   ├── components/
 │   │   ├── Header.tsx                # Global navigation bar
@@ -91,7 +96,8 @@ npm run start
 │   │   │   ├── SceneStoryboardTab.tsx# Stage 4: Scene Storyboard & Table
 │   │   │   ├── KeyframeStudioTab.tsx # Stage 5: Reference Keyframe Anchors (I2V)
 │   │   │   ├── ClipReviewTab.tsx     # Stage 6: Clip Review & FFmpeg Normalization
-│   │   │   ├── ProviderExportTab.tsx # Stage 7: Provider payload inspection & export
+│   │   │   ├── TimelineAssemblyTab.tsx # Stage 7: Multi-Track Timeline & Master Export
+│   │   │   ├── ProviderExportTab.tsx # Stage 8: Provider payload inspection & export
 │   │   │   ├── CharacterModal.tsx    # Register / edit character profile
 │   │   │   └── SceneModal.tsx        # Add / edit scene take
 │   │   └── ui/                       # Accessible Button, Badge, Modal components
@@ -100,8 +106,13 @@ npm run start
 │   │   ├── aiService.ts              # Director reasoning & brainstorm logic
 │   │   ├── imageService.ts           # Visual anchor generator (Flux)
 │   │   ├── storage.ts                # Persistent storage layer & showcase project seeder
+│   │   ├── audio/
+│   │   │   ├── ttsService.ts         # Voiceover synthesis & word timestamps
+│   │   │   ├── subtitleGenerator.ts  # Styled .ass & standard .srt generator
+│   │   │   └── musicLibrary.ts       # Preset cinematic scores & procedural audio
 │   │   ├── ffmpeg/
-│   │   │   └── normalizer.ts         # Deterministic FFmpeg normalization filter chain
+│   │   │   ├── normalizer.ts         # Deterministic FFmpeg normalization filter chain
+│   │   │   └── assembler.ts          # Multi-track concatenation, audio ducking, subtitle burn-in
 │   │   ├── providers/
 │   │   │   ├── runwayAdapter.ts      # Runway Gen-3 Alpha Image-to-Video adapter
 │   │   │   ├── googleVeoAdapter.ts   # Google Veo (Vertex AI) adapter
@@ -110,7 +121,7 @@ npm run start
 │   │   │   └── queueManager.ts       # Background Queue Worker & take persistence
 │   │   └── utils.ts                  # ID generators, reading time calculators, formatting
 │   └── types/
-│       └── index.ts                  # Shared TypeScript interfaces (Take, GenerationJob, Scene)
+│       └── index.ts                  # Shared TypeScript interfaces
 ├── video_creation_platform_architecture_final.md # Master architecture blueprint
 └── package.json
 ```
@@ -118,4 +129,4 @@ npm run start
 ---
 
 ## Next Steps (Roadmap)
-- **Phase 3**: Multi-track Audio & FFmpeg Timeline Assembly (TTS voiceover generation with word-level timestamps, styled subtitle burning `.ass`, background music sidechain ducking, transition effects, and master MP4 export).
+- **Phase 4**: Multi-Provider Expansion & Advanced Controls (additional adapters for Luma Dream Machine, Kling AI, Azure OpenAI Video, timeline trimming and cut-point micro-adjustments, take version comparisons, and provider cost/latency benchmarking).
